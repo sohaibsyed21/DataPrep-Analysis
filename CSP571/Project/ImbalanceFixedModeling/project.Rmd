@@ -1,0 +1,110 @@
+---
+title: "Project"
+author: "Sohaib Syed"
+date: "2023-04-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load dataset
+
+```{r}
+library(caret)
+library(ggplot2)
+library(smotefamily)
+library(pROC)
+library(rpart)
+library(rpart.plot)
+set.seed(0)
+
+# load dataset and scale 'Amount' and 'time' columns then add values as new col
+creditcard <- read.table("creditcard.csv",sep=',',header=T)
+creditcard$Amount<-scale(creditcard$Amount)
+
+# remove time columns
+creditcard<-creditcard[ ,-c(1) ]
+
+# check split between positive and negative class
+table(creditcard$Class)
+
+# create 80/20 split
+trainIndex <- createDataPartition(creditcard$Class, p = .8, list = FALSE, times = 1)
+train <- creditcard[trainIndex,]
+test <- creditcard[-trainIndex,]
+
+# check probability of classes in train and test split
+prop.table(table(train$Class))
+prop.table(table(test$Class))
+
+
+# use SMOTE to create increase minority class in training dataset
+# create an approximate 65/35 split
+train <- SMOTE(train[,-30],train$Class,dup_size = 310)
+train<-train$data
+prop.table(table(train$class))
+
+#view distribution of response variable in train set
+table(train$class)
+table(test$Class)
+hist(as.numeric(train$class))
+
+#convert train and test class to factor
+train$class<-as.factor(train$class)
+test$Class<-as.factor(test$Class)
+
+
+# build logistic model
+
+logfit<-glm(class~., data = train,family = 'binomial')
+
+
+summary(logfit)
+plot(logfit)
+
+# plot residuals
+plot(predict(logfit),residuals(logfit))
+abline(h=0,lty=2,col="grey")
+lines(lowess(predict(logfit),residuals(logfit)),col="black",lwd=2)
+
+# plot qqplot
+qqnorm(residuals(logfit))
+qqline(residuals(logfit))
+
+#predict
+logfit_pred<- predict(logfit, test[,-30],type ='response' )
+
+logfit_pred<- ifelse(logfit_pred>0.5,1,0)
+
+# output confusion matrix
+confusionMatrix(as.factor(logfit_pred),as.factor(test$Class),positive = '1')
+
+# Create ROC curve
+roc_score=roc(test$Class, as.numeric(logfit_pred)) #AUC score
+plot(roc_score ,main ="ROC curve -- Logistic Regression ")
+roc_score$auc
+
+# decision tree with SMOTE
+
+decisionTree_model <- rpart(class ~ . , data= train, method = 'class')
+decisionTree_model
+predicted_val <- predict(decisionTree_model, test, type = 'class')
+
+# table of test predictions from decision tree
+table(predicted_val, test$Class)
+
+# print decision tree
+rpart.plot(decisionTree_model)
+
+confusionMatrix(as.factor(predicted_val),as.factor(test$Class),positive = '1')
+
+```
+
+```{r}
+roc_scoreDT=roc(test$Class, as.numeric(predicted_val)) #AUC score
+plot(roc_scoreDT,main ="ROC curve -- DT ")
+roc_scoreDT$auc
+
+```

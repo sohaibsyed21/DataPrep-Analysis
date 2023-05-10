@@ -1,0 +1,364 @@
+---
+title: "Homework 4"
+author: "Sohaib Syed"
+date: "2023-04-07"
+output:
+  pdf_document: default
+  html_document:
+    toc: yes
+    df_print: paged
+  html_notebook:
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+set.seed(0)
+```
+
+# 1 Recitation Exercises
+
+## 1.1 Chapter 8
+
+### Exercise 1
+
+![Problem 8.1 both figures](unnamed.jpg)
+### Exercise 3
+
+```{r}
+p<-seq(0,1,by=0.01)
+gini<-2*p*(1-p)
+ce<-ifelse(p<=0.5,p,1-p)
+entropy<- -p*log(p)-(1-p)*log(1-p)
+
+plot(p,gini,type='l',col='red',xlab='p',ylab='Value',ylim=c(0,1))
+lines(p, ce, type = "l", col = "blue")
+lines(p, entropy, type = "l", col = "green")
+legend("topright", legend = c("Gini", "Classification Error", "Entropy"), 
+       col = c("red", "blue", "green"), lty = 1)
+
+```
+
+### Exercise 4
+
+![Problem 8.4 parts a and b](unnamed2.jpg)
+### Exercise 5
+
+#### First approach
+
+```{r}
+estimates<-c(0.1, 0.15, 0.2, 0.2, 0.55, 0.6, 0.6, 0.65, 0.7,.75)
+Decide_Red<-sum(estimates>0.5)
+Decide_Green<- abs(length(estimates)-Decide_Red)
+cat(Decide_Red,Decide_Green)
+```
+
+The first approach would classify X as Red, since most estimates were > 0.5 that X was Red
+
+#### Second Approach
+
+```{r}
+mean(estimates)
+
+```
+
+Since the mean is < 0.5, the average approach would classify X as Green
+
+## 1.2 Chapter 9
+
+### Exercise 1
+
+#### a
+
+```{r}
+X1=seq(-5,5,1)
+plot(X1,1+3*X1,xlab='X1',ylab='X2',type='l',main= "Hyperplane of 1 + 3X1 − X2 = 0.")
+text(-2,10, "1+3X1-X2 > 0")
+text(2,-5, "1+3X1-X2 < 0")
+```
+
+#### b
+
+```{r}
+X1=seq(-5,5,1)
+plot(X1,1+3*X1,xlab='X1',ylab='X2',type='l',main= "Hyperplanes 1 + 3X1 − X2 = 0 & −2 + X1 + 2X2 = 0",col='blue')
+lines(X1,1-1/2*X1,col='red')
+text(-2,5, "1+3X1-X2 > 0 & −2+X1+2X2 > 0 ")
+text(1,-7, "1+3X1-X2 < 0 & −2+X1+2X2 < 0 ")
+text(-3,-3, "1+3X1-X2 > 0 & −2+X1+2X2 < 0 ", cex=0.6)
+text(3.5,4, "1+3X1-X2 < 0 & −2+X1+2X2 > 0 ",cex=0.6)
+legend('topleft', legend=c("1+3X1-X2 = 0", "−2+X1+2X2 = 0"),
+       col=c("blue", "red"),lty=1)
+```
+
+### Exercise 2
+
+#### a
+
+```{r}
+library(ggplot2)
+library(ggforce)
+ggplot() + 
+  geom_circle(data = data.frame(X1 = -1, X2 = 2, r = 2), 
+              aes(x0 = X1, y0 = X2, r = r))  + 
+  coord_fixed()
+```
+
+#### b
+
+```{r}
+ggplot() + 
+  geom_circle(data = data.frame(X1 = -1, X2 = 2, r = 2), 
+              aes(x0 = X1, y0 = X2, r = r))  + annotate("text",-1, 2, label="(1 + X1)^2 + (2 − X2)^2 ≤ 4")+annotate("text",-3.25, .25, label="(1 + X1)^2 + (2 − X2)^2 > 4",size=4)+xlim(-4,2)+ylim(0,4)
+```
+
+#### c
+
+(0,0) -> (1+0) \^ 2+(2-0) \^ 2=1 \^ 2 + 2 \^ 2 = 5 5 is greater than 4 so (0,0) is in the blue class.
+
+(-1,1) -> (1-1) \^ 2 + (2-1) \^ 2 = (0) \^ 2 + (1) \^ 2 = 1, red class
+
+(2,2) - \> (1+2) \^ 2+(2-2) \^ 2 = 9+0 = 9, blue class
+
+(3,8)-> (1+3)^2 +(2-8) \^ 2= 16+36= 52, blue class
+
+#### d
+
+The decision boundary occurs when (1+x1) \^ 2 + ( 2 - x \^ 2) - 4 = 0. We can see that the terms that are present are not only x1 and x1, but also x1 \^ 2 and x2 \^ 2. Therefore, in order for the decision boundary to be linear we need to consider the case where 4 terms are present, x1,x1 \^ 2, x2,x2 \^ 2. x1 and x2 would not be sufficient on creating a linear decision boundary.
+
+### Exercise 3
+
+#### a
+
+```{r}
+toys=data.frame(X1=c(3,2,4,1,2,4,4),X2=c(4,2,4,4,1,3,1),Y=c('red','red','red','red','blue','blue','blue'))
+plot(toys$X1,toys$X2,col=toys$Y)
+```
+
+#### b
+
+From the looks of the graph, there seems to be a visible split between blue and red points. If we look closely at point (2,1.5) and (4,3.5), we can see that if we drew a line connecting those two points we would have the appropriate slope needed to split the two classes.
+
+Calculate slope: (3.5-1.5)/(4-2) =2/2=1
+
+point slope form to calculate intercept: X2-1.5=1(X1-2) solve for X2: X2= X1-2 +1.5= X1-.5
+
+In the form (9.1): 0.5-X1+X2=0
+
+```{r}
+plot(toys$X1,toys$X2,col=toys$Y)
+abline(-.5, 1)
+```
+
+#### c
+
+Classify to Red if 0.5 -(1)X1+(1)X2 \>0, and classify to Blue otherwise.
+
+B0=0.5, B1=-1, B2=1
+
+#### d
+
+```{r}
+plot(toys$X1,toys$X2,col=toys$Y)
+abline(-.5, 1)
+abline(0,1,lty=2)
+abline(-1,1,lty=2)
+```
+
+The dashed lines are the margins for the maximal margin hyperplane
+
+#### e
+
+The support vectors are (2,2), (4,4) which help create the upper margin of the hyperplane. Then also (2,1) and (4,3) are also support vectors since they also define the hyperplane but for the lower margin.
+
+#### f
+
+Since the 7th observation (4,1) is not a support vector it is not helping to define the hyperplane. In this case, that observation is not influencing the hyperplane at all.
+
+#### g
+
+After playing around with some values the y-intercept of 0 along with an B1 of .9 and B2 0f 1 still divides the classes but much less optimally.
+
+X2-0=.9(X1-0) X2=.9X1-0 X2-.9X1=0 \<- equation of less optimal hyperplane
+
+Classify Red if X2\> .9X1, and classify Blue otherwise
+
+B0=0, B1=-.9, B2=1
+
+```{r}
+plot(toys$X1,toys$X2,col=toys$Y,xlim=c(-1,5),ylim = c(-1,6))
+abline(v=0,h=0)
+abline(0, .9,lty=1,col='red')
+```
+
+#### h
+
+```{r}
+plot(toys$X1,toys$X2,col=toys$Y)
+points(3.5,1.5,col='red')
+text(3.5,1.75,"new point")
+```
+
+A hyperplane can no longer be used to separate these classes.
+
+# 2 Practicum Problems
+
+## Problem 1
+
+```{r}
+library(rpart)
+library(rpart.plot)
+x1 <- rnorm(100, 5, 2)
+x2 <- rnorm(100, -5, 2)
+y <- as.factor(c(rep(1, 50), rep(0, 50)))
+data1 <- data.frame(x1,x2, y)
+tree1 <- rpart(y ~ x1 + x2, data = data1)
+rpart.plot(tree1)
+```
+
+the threshold for the first split is -6.5. the first value distributes the dataset into a 71 to 29 split. The tree has 5 internal nodes and 6 terminal nodes. The empirical distribution shows that the split was able to classify points into 2 classes.
+
+code below taken and modified from : <https://datascience.stackexchange.com/questions/77302/is-there-a-way-to-get-gini-index-values-for-every-node-in-rpart-model>
+
+```{r}
+frame <- tree1$frame
+# compute gini index for each node
+frame[['gini']] <- 1 - (frame[['dev']] / frame[['n']])^2 - (1 - frame[['dev']] / frame[['n']])^2
+# compute gini entropy for each node
+frame[['entropy']] <- - (frame[['dev']] / frame[['n']]) * log(frame[['dev']] / frame[['n']]) - (1 - frame[['dev']] / frame[['n']]) * log(1 - frame[['dev']] / frame[['n']])
+frame[frame$var != '',][,c('gini','entropy')]
+```
+
+gini and entropy at each node
+
+```{r}
+# For distribution (1,2) and (-1,2)
+x1_2 <- rnorm(100, 1, 2)
+x2_2 <- rnorm(100, -1, 2)
+y_2 <- as.factor(c(rep(1, 50), rep(0, 50)))
+data1_2 <- data.frame(x1_2,x2_2, y_2)
+tree1_2 <- rpart(y_2 ~ x1_2 + x2_2, data = data1_2)
+rpart.plot(tree1_2)
+
+frame_2 <- tree1_2$frame
+# compute gini index for each node
+frame_2[['gini']] <- 1 - (frame_2[['dev']] / frame_2[['n']])^2 - (1 - frame_2[['dev']] / frame_2[['n']])^2
+# compute gini entropy for each node
+frame_2[['entropy']] <- - (frame_2[['dev']] / frame_2[['n']]) * log(frame_2[['dev']] / frame_2[['n']]) - (1 - frame_2[['dev']] / frame_2[['n']]) * log(1 - frame_2[['dev']] / frame_2[['n']])
+frame_2[frame_2$var != '',][,c('gini','entropy')]
+```
+
+This tree has 6 internal nodes and 7 terminal nodes. This increase is due to the mean of the new distribution being smaller thus more splits are needed in the tree to try to correctly classify a point.
+
+```{r}
+rpart.plot(prune.rpart(tree1_2,.1))
+```
+
+The new tree is smaller. It has 2 internal nodes, and 3 terminal nodes. It only does the first two splits of the original tree. The performance seems to be better as the probabilities of terminal nodes are greater than the terminal nodes of original meaning there is more of chance the points are classified correctly.
+
+## Problem 2
+
+```{r}
+library(caret)
+white_wine<-read.csv("winequality-white.csv",sep = ";",header = T)
+white_wine$quality<-as.factor(white_wine$quality)
+
+red_wine<-read.csv("winequality-red.csv",sep = ";",header = T)
+red_wine$quality<-as.factor(red_wine$quality)
+
+white_index<-createDataPartition(white_wine$quality,p=0.8,list=F)
+white_Train <- white_wine[white_index,]
+white_Test <- white_wine[-white_index,]
+
+red_index<-createDataPartition(red_wine$quality,p=0.8,list=F)
+red_Train <- red_wine[red_index,]
+red_Test <- red_wine[-red_index,]
+
+white_fit<-rpart(quality~.,data=white_Train)
+red_fit<-rpart(quality~.,data=red_Train)
+
+rpart.plot(white_fit)
+rpart.plot(red_fit)
+
+white_pred<-predict(white_fit,white_Test,type='class')
+cfmwhite<-confusionMatrix(white_pred,white_Test$quality)
+cfmwhite
+
+red_pred<-predict(red_fit,red_Test,type='class')
+cfmred<-confusionMatrix(red_pred,red_Test$quality)
+cfmred
+
+cat('\n The accuracy on test set of white wine quality = ',cfmwhite$overall[1])
+cat('\n The accuracy on test set of red wine quality = ',cfmred$overall[1])
+```
+
+We see that the tree for red wine quality is larger. It has more nodes. It also uses more predictors to decide the split. white wine only uses 'alcohol', 'volatile acidity' and 'free sulfur dioxide'.
+
+```{r}
+library(randomForest)
+white_rf<-randomForest(quality~.,data=white_Train)
+white_rfpred<-predict(white_rf,white_Test,type='class')
+cfmwhite_rf<-confusionMatrix(white_rfpred,white_Test$quality)
+
+
+red_rf<-randomForest(quality~.,data=red_Train)
+red_rfpred<-predict(red_rf,red_Test,type='class')
+cfmred_rf<-confusionMatrix(red_rfpred,red_Test$quality)
+
+
+cat('\n The accuracy on test set of random forest white wine quality = ',cfmwhite_rf$overall[1])
+cat('\n The accuracy on test set of random forest red wine quality = ',cfmred_rf$overall[1])
+```
+
+The accuracy's for both datasets once using random forest was higher than without random forest.
+
+## Problem 3
+
+<https://kbroman.org/blog/2017/08/08/eof-within-quoted-string/>
+
+```{r}
+library(tm)
+library(e1071)
+smsdata<-read.table("smsspamcollection/SMSSpamCollection",sep = "\t",quote="", fill=F,header=F,stringsAsFactors = F,col.names = c('label','text'))
+smsdata$label<-as.factor(smsdata$label)
+sms_corpus<-Corpus(VectorSource(smsdata$text))
+
+sms_corpus <- tm_map(sms_corpus, content_transformer(tolower))
+sms_corpus <- tm_map(sms_corpus, removeWords, stopwords())
+sms_corpus <- tm_map(sms_corpus, stripWhitespace)
+sms_corpus <- tm_map(sms_corpus, removePunctuation)
+
+sms_termmatrix<-DocumentTermMatrix(sms_corpus)
+
+sms_freq<-findFreqTerms(sms_termmatrix,lowfreq = 10)
+
+sms_termmatrix<-sms_termmatrix[,sms_freq]
+
+sms_index<-createDataPartition(smsdata$label,p=0.8,list=F)
+
+sms_Train<-sms_termmatrix[sms_index,]
+sms_Test<-sms_termmatrix[-sms_index,]
+
+sms_Trainlabel<-smsdata$label[sms_index]
+sms_Testlabel<-smsdata$label[-sms_index]
+
+smsboolTrain <- as.matrix(sms_Train)
+smsboolTrain[smsboolTrain > 0] = 1
+smsboolTest <- as.matrix(sms_Test)
+smsboolTest[smsboolTest > 0] = 1
+
+smsTrain<-data.frame(smsboolTrain)
+smstest<-data.frame(smsboolTest)
+
+smsfit<-svm(smsTrain,sms_Trainlabel)
+
+sms_train_pred<-predict(smsfit,smsTrain)
+sms_test_pred<-predict(smsfit,smstest)
+
+sms_train_cfm<-confusionMatrix(sms_train_pred,sms_Trainlabel)
+sms_test_cfm<-confusionMatrix(sms_test_pred,sms_Testlabel)
+
+cat('\n The accuracy on training set = ',sms_train_cfm$overall[1])
+cat('\n The accuracy on testing set = ',sms_test_cfm$overall[1])
+```

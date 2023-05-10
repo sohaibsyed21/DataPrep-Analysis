@@ -1,0 +1,258 @@
+---
+title: "Homework5"
+author: "Sohaib Syed"
+date: "2023-05-03"
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  pdf_document: default
+  html_notebook:
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1 Recitation Exercises
+
+## 1.1 Chapter 12
+
+### Exercise 1
+
+#### 
+![Problem 1 part a. Prove 12.18](./unnamed.jpg)
+
+#### b
+
+As seen in step 2b of K-means cluster we are sure to decrease the objective. In Part a we proved that the two sides are equivalent to each other. the left side we see is the actual objective function. In K-means we are assigning the point to closest centroid which ispresent in the right equation. By assigning point to closest centroid we actually minimize the right equation of the identity directly which as proven in part a is equal to the left side. The left side therefore, which the object (12.17) is decreased wit every iteration
+
+
+### Exerise 2
+
+#### a
+
+
+```{r}
+
+d = as.dist(matrix(c(0, 0.3, 0.4, 0.7, 
+                     0.3, 0, 0.5, 0.8,
+                     0.4, 0.5, 0.0, 0.45,
+                     0.7, 0.8, 0.45, 0.0), nrow = 4))
+plot(hclust(d, method = "complete"))
+```
+#### b
+
+```{r}
+d = as.dist(matrix(c(0, 0.3, 0.4, 0.7, 
+                     0.3, 0, 0.5, 0.8,
+                     0.4, 0.5, 0.0, 0.45,
+                     0.7, 0.8, 0.45, 0.0), nrow = 4))
+plot(hclust(d, method = "single"))
+```
+
+#### c
+
+In dendogram if you cut around .55, then you have two clusters one with {1,2} and another with {3,4}
+
+#### d
+cut around .42 will create {4} and {1,2,3}
+
+
+#### e
+
+```{r}
+
+plot(hclust(d, method = "complete"), labels = c(2,1,4,3))
+
+```
+### Exercise 3
+
+#### a
+
+```{r}
+x1 <- c(1, 1, 0, 5, 6, 4) 
+x2<- c(4, 3, 4, 1, 2, 0)
+knndf<-cbind(x1,x2)
+plot(knndf[,1], knndf[,2])
+```
+
+#### b
+
+```{r}
+set.seed(0)
+clust <- sample(2, nrow(knndf), replace = T)
+clust
+plot(knndf[,1], knndf[,2], col = (clust + 1), pch = 20, cex = 2)
+```
+
+#### c
+
+```{r}
+centroid1 <- c(mean(knndf[clust == 1,1]), mean(knndf[clust == 1, 2]))
+centroid2 <- c(mean(knndf[clust == 2, 1]), mean(knndf[clust == 2, 2]))
+plot(knndf[,1], knndf[,2], col=(clust + 1), pch = 20, cex = 2)
+points(centroid1[1], centroid1[2], col = 2, pch = 4)
+points(centroid2[1], centroid2[2], col = 3, pch = 4)
+```
+#### d
+
+```{r}
+clust<-c(2,2,2,1,1,1)
+plot(knndf[, 1], knndf[, 2], col = (clust + 1), pch = 20, cex = 2)
+points(centroid1[1], centroid1[2], col = 2, pch = 4)
+points(centroid2[1], centroid2[2], col = 3, pch = 4)
+```
+#### e
+
+```{r}
+centroid1 <- c(mean(knndf[clust == 1,1]), mean(knndf[clust == 1, 2]))
+centroid2 <- c(mean(knndf[clust == 2, 1]), mean(knndf[clust == 2, 2]))
+plot(knndf[,1], knndf[,2], col=(clust + 1), pch = 20, cex = 2)
+points(centroid1[1], centroid1[2], col = 2, pch = 4)
+points(centroid2[1], centroid2[2], col = 3, pch = 4)
+```
+
+Since all points are already assigned to closest centroid then we stop here. One centroid is same as a point at (5,1)
+
+#### f
+
+```{r}
+
+plot(knndf[,1], knndf[,2], col=(clust + 1), pch = 20, cex = 2)
+```
+
+### Exercise 4
+
+#### a
+
+I don't think there is enough information. We would need a dissimilaity matrix. If complete and single dissimilarity matrices produce the distnaces then they would fuse at the same spot. however if they are different than complete linkage will have a higher point of fusion.
+
+
+#### b
+
+WE are only dealing with single points so there is no concept of max or min distance. They are going to result in the same value so both links will fuse at same height
+
+
+# 2 Practicum Problems
+
+## Problem 1
+
+
+```{r}
+winedf<-read.table("./wine.data", sep = ',',col.names = c("class","Alcohol","Malic acid","Ash","Alcalinity","Magnesium", "Total_Phenols","Flavanoids","Nonflavanoid" ,"Proanthocyanins","Color_Intensity", "Hue", "OD280/OD315", "Proline"))
+
+colMeans(winedf)
+
+# since the means are all different and on very different sacles We should scale and center before PCA
+winepca<-prcomp(winedf[,-1],center = T, scale. = T)
+biplot(winepca, scale = 0)
+```
+
+Malic acid is the component opposite of Hue as shown in the graph. this implies that they are strongly negatively correlated.
+
+```{r}
+cat("correlation value is",cor(winedf$Hue,winedf$Malic.acid))
+```
+```{r}
+# https://www.statology.org/scree-plot-r/
+variancebycomponent=(winepca$sdev)**2/(sum(winepca$sdev**2))
+library(ggplot2)
+
+qplot(c(1:13), variancebycomponent) + 
+  geom_line() + 
+  xlab("Principal Component") + 
+  ylab("Variance Explained") +
+  ggtitle("Scree Plot") +
+  ylim(0, 1)
+
+cat("pc1 and pc2 explain" ,sum(variancebycomponent[1]+variancebycomponent[2])*100, "% of variance")
+```
+
+
+## Problem 2
+
+```{r}
+arrestdf<-data.frame(USArrests)
+
+colMeans(arrestdf)
+
+# once again we see means and ranges of columns are drastically different
+# so we will scale and center data
+
+arrestdf<-scale(arrestdf, center = T, scale = T)
+
+colMeans(arrestdf)
+
+
+withinss = c()
+i = 2
+for (k in 2:10){
+  set.seed(0)
+  model = kmeans(arrestdf, k)
+  withinss[i] = model$tot.withinss
+  i = i + 1
+}
+
+plot(withinss, xlab = " K", main = "within-cluster sum of squares ", type = "b")
+
+```
+We see that after K=5 the elbow is formed so we choose K=5
+
+```{r}
+library(factoextra)
+set.seed(0)
+optimalkmeans<-kmeans(arrestdf,5)
+
+fviz_cluster(optimalkmeans,arrestdf)
+```
+## Problem 3
+
+
+```{r}
+winequalitydf<-read.csv("./winequality-white.csv",header=T,sep=';')
+
+colMeans(winequalitydf)
+
+# again means are very different so we should scale
+
+winequalitydf[,-12]<-scale(winequalitydf[,-12], center = T, scale = T)
+
+winecompletedend = hclust (dist(winequalitydf[,-12]), method = "complete")
+plot(winecompletedend)
+cat("penultimate merge height", winecompletedend$height[length(winecompletedend$height)])
+
+winesingledend = hclust (dist(winequalitydf[,-12]), method = "single")
+plot(winesingledend)
+cat("penultimate merge height", winesingledend$height[length(winesingledend$height)])
+
+```
+
+
+```{r}
+library(dplyr)
+winecompletecut<-cutree(winecompletedend, k = 2)
+winesingleecut<-cutree(winesingledend, k = 2)
+
+completestats = winequalitydf[,-12]
+completestats$Clusters = winecompletecut
+completestats = group_by(completestats,Clusters)
+a = summarise_each(completestats,list(mean=mean))
+
+abs(a[2,-1]-a[1,-1])
+
+table(winecompletecut)
+
+completestats2 = winequalitydf[,-12]
+completestats2$Clusters = winesingleecut
+completestats2 = group_by(completestats2,Clusters)
+b = summarise_each(completestats2,list(mean=mean))
+
+abs(b[2,-1]-b[1,-1])
+
+table(winesingleecut)
+```
+
+The feature with the largest difference was density for both cut trees. The more balanced tree was the complete tree as shown when plotting the tree
