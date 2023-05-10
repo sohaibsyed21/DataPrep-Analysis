@@ -1,1 +1,1 @@
-The .rmd 
+The .Rmd file contains my part of the project which is the process which helps fix imbalanced data. The dataset is from https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud, which was used to identify credit card fraud and through SMOTE sampling technique I was able to improve my teams models.
